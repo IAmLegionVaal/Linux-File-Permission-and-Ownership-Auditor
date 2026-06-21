@@ -1,26 +1,43 @@
 # Linux File Permission and Ownership Auditor
 
-A read-only Bash toolkit for auditing world-writable files, orphaned ownership, SUID/SGID binaries, sensitive-file modes, and risky directory permissions.
+A Linux support toolkit for auditing risky file permissions and applying targeted, guarded ownership and mode repairs.
 
-## Usage
+## Audit script
 
 ```bash
 chmod +x src/file_permission_auditor.sh
 sudo ./src/file_permission_auditor.sh --path / --max-results 5000
 ```
 
-## Checks performed
+## Repair script
 
-- World-writable files and directories
-- Files without valid user or group ownership
-- SUID and SGID executables
-- Sticky-bit coverage on shared writable directories
-- Permissions on sensitive account, SSH, sudo, cron, and service files
-- Text, CSV, and JSON reports
+```bash
+chmod +x src/file_permission_repair.sh
+sudo ./src/file_permission_repair.sh --path /srv/app --remove-world-write --dry-run
+```
+
+Examples:
+
+```bash
+sudo ./src/file_permission_repair.sh --path /srv/app/config.ini --mode 640
+sudo ./src/file_permission_repair.sh --path /srv/app --owner appuser --group appgroup --recursive
+sudo ./src/file_permission_repair.sh --path /srv/shared --set-sticky
+sudo ./src/file_permission_repair.sh --path /srv/app --remove-world-write --recursive
+```
+
+## What the repair does
+
+- Changes owner, group or mode only on an explicitly selected target.
+- Can remove world-write permission.
+- Can add the sticky bit to a selected directory.
+- Supports recursive owner/group or world-write repair while refusing dangerous top-level recursive targets.
+- Records original metadata and captures before-and-after evidence.
+- Refuses symbolic-link targets.
+- Supports dry-run, confirmation prompts, logs and clear exit codes.
 
 ## Safety
 
-The script does not change ownership, permissions, ACLs, extended attributes, or security contexts.
+Recursive permission repair can affect application behaviour. Review the audit output first and target only paths whose expected ownership and permissions are known.
 
 ## Author
 
